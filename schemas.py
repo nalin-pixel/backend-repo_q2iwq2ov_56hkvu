@@ -12,10 +12,9 @@ Model name is converted to lowercase for the collection name:
 """
 
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, List
 
-# Example schemas (replace with your own):
-
+# Existing examples
 class User(BaseModel):
     """
     Users collection schema
@@ -38,11 +37,32 @@ class Product(BaseModel):
     category: str = Field(..., description="Product category")
     in_stock: bool = Field(True, description="Whether product is in stock")
 
-# Add your own schemas here:
-# --------------------------------------------------
+# Food ordering app schemas
+class Menuitem(BaseModel):
+    """
+    Food menu items
+    Collection name: "menuitem"
+    """
+    name: str = Field(..., description="Dish name")
+    description: Optional[str] = Field(None, description="Short description")
+    price: float = Field(..., ge=0, description="Price in USD")
+    category: str = Field("Featured", description="Category like Pizza, Bowls, Drinks")
+    image: Optional[str] = Field(None, description="Image URL")
+    available: bool = Field(True, description="Is item available to order")
 
-# Note: The Flames database viewer will automatically:
-# 1. Read these schemas from GET /schema endpoint
-# 2. Use them for document validation when creating/editing
-# 3. Handle all database operations (CRUD) directly
-# 4. You don't need to create any database endpoints!
+class Orderitem(BaseModel):
+    name: str
+    price: float
+    quantity: int = Field(1, ge=1)
+
+class Order(BaseModel):
+    """
+    Orders placed by customers
+    Collection name: "order"
+    """
+    items: List[Orderitem]
+    total: float = Field(..., ge=0)
+    status: str = Field("pending", description="pending, confirmed, preparing, delivered")
+    customer_name: Optional[str] = None
+    customer_phone: Optional[str] = None
+    delivery_address: Optional[str] = None
